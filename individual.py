@@ -19,9 +19,9 @@ class Individual():
 		"""The individual is equal to their fitness score"""
 		num_correct_genes = sum(self.chromosome)
 		return num_correct_genes == other
-		# if correct_genes = 1, the individual's fitness score is 1
 
 	def generate_random_chromosome(self):
+		"""Generate a random chromosome of length: config.CHROMOSOME_LENGTH"""
 		chromosome = []
 		for _ in range(self.chromosome_length):
 			if (random.random() < config.CHROMOSOME_GENERATION_1_CHANCE):
@@ -31,6 +31,7 @@ class Individual():
 		return chromosome
 
 	def get_fitness_score(self):
+		"""Fitness score is equal to the number of 1s in the chromosome"""
 		num_correct_genes = sum(self.chromosome)
 		return num_correct_genes
 
