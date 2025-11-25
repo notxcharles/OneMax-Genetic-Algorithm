@@ -11,12 +11,11 @@ class GA():
 
 	def __init__(self):
 		self.population: list[Individual] = self.generate_first_gen_individuals()
-		print(self.population)
-		print([indiv.get_fitness_score() for indiv in self.population])
-		self.create_new_generation()
-		print("new generation:")
-		print(self.population)
-		print([indiv.get_fitness_score() for indiv in self.population])
+		self.highest_fitness = max([individual.get_fitness_score() for individual in self.population])
+		self.current_generation: int = 1
+		self.start_algorithm()
+		# print(self.population)
+		# print([indiv.get_fitness_score() for indiv in self.population])
 
 
 	def generate_first_gen_individuals(self):
@@ -34,9 +33,6 @@ class GA():
 		tournament_population: list[Individual] = random.sample(self.population, tournament_size)
 		tournament_scores: list[int] = [individual.get_fitness_score() for individual in tournament_population]
 
-		# print(f"{tournament_population=}")
-		# print(f"{tournament_scores=}")
-
 		highest_score: int = -1
 		highest_individual: Individual = None
 
@@ -51,8 +47,11 @@ class GA():
 	def create_new_generation(self):
 		"""Given the current population, create the new generation"""
 
-		elites = self.select_best(config.ELITES_SIZE)
 		children = []
+
+		elites = self.select_best(config.ELITES_SIZE)
+		for elite in elites:
+			children.append(elite)
 
 		size = len(self.population) - config.ELITES_SIZE
 
@@ -104,6 +103,21 @@ class GA():
 		child_b.mutation()
 
 		return (child_a, child_b)
+
+	def get_generation_statistics(self):
+		highest_fitness = max([individual.get_fitness_score() for individual in self.population])
+		total_fitness = sum([individual.get_fitness_score() for individual in self.population])
+		average_fitness = total_fitness / len(self.population)
+		return print(f"{self.current_generation}: {total_fitness=}, {average_fitness=}, {highest_fitness=}")
+
+	def start_algorithm(self):
+		self.get_generation_statistics()
+		while ((self.current_generation <= config.MAX_GENERATIONS) & (self.highest_fitness < int(config.CHROMOSOME_LENGTH))):
+			self.create_new_generation()
+			self.current_generation += 1
+			self.highest_fitness = max([individual.get_fitness_score() for individual in self.population])
+			self.get_generation_statistics()
+
 
 
 ga = GA()
