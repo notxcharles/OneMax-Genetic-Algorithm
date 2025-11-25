@@ -5,6 +5,7 @@ import random
 
 class Individual:
 	chromosome_length = config.CHROMOSOME_LENGTH
+	mutation_chance = config.MUTATION_CHANCE
 
 	def __init__(self, chromosome: Chromosome = None):
 		if chromosome:
@@ -39,6 +40,17 @@ class Individual:
 		"""Fitness score is equal to the number of 1s in the chromosome"""
 		num_correct_genes = sum(self.chromosome)
 		return num_correct_genes
+
+	def mutation(self):
+		"""Perform a mutation if x chance"""
+		if random.random() < config.MUTATION_CHANCE:
+			i = random.randint(0, len(self.chromosome))
+			if self.chromosome[i] == 1:
+				self.chromosome[i] = 0
+			else:
+				self.chromosome[i] = 1
+		return
+
 
 # c: Chromosome = [0,0,0,0,0,0,0,0,0,0]
 indiv = Individual()
