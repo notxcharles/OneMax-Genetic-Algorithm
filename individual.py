@@ -3,8 +3,7 @@ from custom_types import Chromosome
 import random
 
 
-
-class Individual():
+class Individual:
 	chromosome_length = config.CHROMOSOME_LENGTH
 
 	def __init__(self, chromosome: Chromosome = None):
@@ -19,6 +18,12 @@ class Individual():
 		"""The individual is equal to their fitness score"""
 		num_correct_genes = sum(self.chromosome)
 		return num_correct_genes == other
+
+	def __repr__(self):
+		return (f"Individual({self.get_fitness_score()})")
+
+	def __str__(self):
+		return (f"Individual({self.get_fitness_score()})")
 
 	def generate_random_chromosome(self):
 		"""Generate a random chromosome of length: config.CHROMOSOME_LENGTH"""
