@@ -18,7 +18,7 @@ class GA:
 		"""
 		pop: list[Individual] = []
 
-		for _ in range(len(self.population)):
+		for _ in range(config.MAX_GENERATIONS):
 			indiv = Individual()
 			pop.append(indiv)
 
@@ -130,12 +130,12 @@ class GA:
 		highest_fitness = max([individual.get_fitness_score() for individual in self.population])
 		total_fitness = sum([individual.get_fitness_score() for individual in self.population])
 		average_fitness = total_fitness / len(self.population)
-		return print(f"{self.current_generation}: {total_fitness=}, {average_fitness=}, {highest_fitness=}")
+		return print(f"{self.current_generation}: {total_fitness=}, {average_fitness=}, {highest_fitness=}, {len(self.population)=}")
 
 	def start_algorithm(self):
 		self.get_generation_statistics()
 		while ((self.current_generation <= config.MAX_GENERATIONS) & (self.highest_fitness < int(config.CHROMOSOME_LENGTH))):
-			self.create_new_generation()
+			self.create_new_generation_tournament()
 			self.current_generation += 1
 			self.highest_fitness = max([individual.get_fitness_score() for individual in self.population])
 			self.get_generation_statistics()

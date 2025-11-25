@@ -26,23 +26,34 @@ class Individual:
 	def __str__(self):
 		return (f"Individual({self.get_fitness_score()})")
 
-	def generate_random_chromosome(self):
-		"""Generate a random chromosome of length: config.CHROMOSOME_LENGTH"""
+	def generate_random_chromosome(self) -> Chromosome:
+		"""Generate a random chromosome of length /config.CHROMOSOME_LENGTH/
+
+		For each Gene in Chromosome, there is a /config.CHROMOSOME_GENERATION_1_CHANCE/ to generate a 1
+
+		:rtype: Chromosome
+		:return: The individual's chromosome
+		"""
 		chromosome = []
 		for _ in range(self.chromosome_length):
-			if (random.random() < config.CHROMOSOME_GENERATION_1_CHANCE):
+			if random.random() < config.CHROMOSOME_GENERATION_1_CHANCE:
 				chromosome.append(1)
 			else:
 				chromosome.append(0)
 		return chromosome
 
-	def get_fitness_score(self):
+	def get_fitness_score(self) -> int:
 		"""Fitness score is equal to the number of 1s in the chromosome"""
 		num_correct_genes = sum(self.chromosome)
 		return num_correct_genes
 
-	def mutation(self):
-		"""Perform a mutation if x chance"""
+	def mutation(self) -> None:
+		"""Perform a mutation if x chance.
+
+		If mutation is to occur, will pick a gene from the chromosome at random and change it
+
+		:return: None
+		"""
 		if random.random() < config.MUTATION_CHANCE:
 			i = random.randint(0, len(self.chromosome)-1)
 			if self.chromosome[i] == 1:
@@ -50,9 +61,3 @@ class Individual:
 			else:
 				self.chromosome[i] = 1
 		return
-
-
-# c: Chromosome = [0,0,0,0,0,0,0,0,0,0]
-indiv = Individual()
-print(f"{indiv.chromosome}")
-print(f"{indiv.get_fitness_score()}")
