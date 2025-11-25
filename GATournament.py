@@ -4,13 +4,13 @@ import csv
 from individual import Individual
 import config
 
-class GA:
-	file_name = "tournament_with_elites.csv"
-
-	def __init__(self):
+class GATournament:
+	def __init__(self, filename: str):
 		self.population: list[Individual] = self.generate_first_gen_individuals()
 		self.highest_fitness = max([individual.get_fitness_score() for individual in self.population])
 		self.current_generation: int = 1
+
+		self.file_name = filename
 
 		self.start_algorithm()
 
@@ -57,13 +57,9 @@ class GA:
 		"""
 		children = []
 
-		elites = self.select_best(config.ELITES_SIZE)
-		for elite in elites:
-			children.append(elite)
+		size = len(self.population)
 
-		size = len(self.population) - config.ELITES_SIZE
-
-		for i in range(0, len(self.population) - config.ELITES_SIZE, 2):
+		for _ in range(0, size, 2):
 			parent_a = self.tournament_selection()
 			parent_b = self.tournament_selection()
 
@@ -74,34 +70,6 @@ class GA:
 
 		self.population = children
 		return
-
-	def select_best(self, k=2):
-		"""Select the best individuals from self.population
-
-		:param k: Select k amount of individuals with the highest fitness
-		:return: The k best individuals
-		"""
-		elites = []
-
-		pop_copy = self.population.copy()
-		pop_scores = [individual.get_fitness_score() for individual in pop_copy]
-		for _ in range(k):
-			highest_score: int = -1
-			highest_score_i: int = 0
-			highest_individual: Individual = None
-
-			for i, individual in enumerate(pop_copy):
-				individual_score: int = pop_scores[i]
-				if individual_score > highest_score:
-					highest_score = individual_score
-					highest_score_i = i
-					highest_individual = individual
-
-			pop_copy.pop(highest_score_i)
-			pop_scores.pop(highest_score_i)
-			elites.append(highest_individual)
-
-		return elites
 
 	def breed_individuals(self, parent_a: Individual, parent_b: Individual) -> tuple[Individual, Individual]:
 		"""Breeds two individuals' chromosomes.
@@ -154,7 +122,9 @@ class GA:
 		stats = self.get_generation_statistics()
 		self.save_generation_statistics(stats, True)
 
-with open("tournament_with_elites.csv", mode='w', newline="\n") as csv_file:
+file_name = "tournament.csv"
+
+with open(file_name, mode='w', newline="\n") as csv_file:
 	writer = csv.writer(csv_file)
 	writer.writerow([
 		"GenerationNumber",
@@ -166,4 +136,4 @@ with open("tournament_with_elites.csv", mode='w', newline="\n") as csv_file:
 	])
 
 for i in range(1000):
-	ga = GA()
+	ga = GATournament(file_name)
