@@ -12,16 +12,6 @@ class GA:
 		self.highest_fitness = max([individual.get_fitness_score() for individual in self.population])
 		self.current_generation: int = 1
 
-		with open(self.file_name, mode="wt", newline="\n") as csv_file:
-			writer = csv.writer(csv_file)
-			writer.writerow([
-				"GenerationNumber",
-				"TotalFitness",
-				"AverageFitness",
-				"HighestFitness",
-				"PopulationSize",
-			])
-
 		self.start_algorithm()
 
 	def generate_first_gen_individuals(self):
@@ -139,11 +129,11 @@ class GA:
 
 		return (child_a, child_b)
 
-	def save_generation_statistics(self, statistics: list[int | float]):
+	def save_generation_statistics(self, statistics: list[int | float], complete=False):
 		with open(self.file_name, mode='a', newline="\n") as csv_file:
 			writer = csv.writer(csv_file)
 			generation, total, average, highest, popsize = statistics
-			writer.writerow([generation, total, average, highest, popsize])
+			writer.writerow([generation, total, average, highest, popsize, complete])
 		return
 
 	def get_generation_statistics(self):
@@ -155,15 +145,25 @@ class GA:
 		return [self.current_generation, total_fitness, average_fitness, highest_fitness, len(self.population)]
 
 	def start_algorithm(self):
-		stats = self.get_generation_statistics()
-		self.save_generation_statistics(stats)
 		while ((self.current_generation <= config.MAX_GENERATIONS) & (self.highest_fitness < int(config.CHROMOSOME_LENGTH))):
+			stats = self.get_generation_statistics()
+			self.save_generation_statistics(stats)
 			self.create_new_generation_tournament()
 			self.current_generation += 1
 			self.highest_fitness = max([individual.get_fitness_score() for individual in self.population])
-			stats = self.get_generation_statistics()
-			self.save_generation_statistics(stats)
+		stats = self.get_generation_statistics()
+		self.save_generation_statistics(stats, True)
 
+with open("tournament_with_elites.csv", mode='w', newline="\n") as csv_file:
+	writer = csv.writer(csv_file)
+	writer.writerow([
+		"GenerationNumber",
+		"TotalFitness",
+		"AverageFitness",
+		"HighestFitness",
+		"PopulationSize",
+		"StoppingConditionReached"
+	])
 
-for i in range(250):
+for i in range(1000):
 	ga = GA()
