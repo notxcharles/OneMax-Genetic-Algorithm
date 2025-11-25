@@ -44,7 +44,7 @@ class Individual:
 	def mutation(self):
 		"""Perform a mutation if x chance"""
 		if random.random() < config.MUTATION_CHANCE:
-			i = random.randint(0, len(self.chromosome))
+			i = random.randint(0, len(self.chromosome)-1)
 			if self.chromosome[i] == 1:
 				self.chromosome[i] = 0
 			else:
