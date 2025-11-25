@@ -1,14 +1,27 @@
 import random
+import csv
 
 from individual import Individual
 import config
 
 class GA:
+	file_name = "tournament_with_elites.csv"
 
 	def __init__(self):
 		self.population: list[Individual] = self.generate_first_gen_individuals()
 		self.highest_fitness = max([individual.get_fitness_score() for individual in self.population])
 		self.current_generation: int = 1
+
+		with open(self.file_name, mode="wt", newline="\n") as csv_file:
+			writer = csv.writer(csv_file)
+			writer.writerow([
+				"GenerationNumber",
+				"TotalFitness",
+				"AverageFitness",
+				"HighestFitness",
+				"PopulationSize",
+			])
+
 		self.start_algorithm()
 
 	def generate_first_gen_individuals(self):
@@ -126,18 +139,31 @@ class GA:
 
 		return (child_a, child_b)
 
+	def save_generation_statistics(self, statistics: list[int | float]):
+		with open(self.file_name, mode='a', newline="\n") as csv_file:
+			writer = csv.writer(csv_file)
+			generation, total, average, highest, popsize = statistics
+			writer.writerow([generation, total, average, highest, popsize])
+		return
+
 	def get_generation_statistics(self):
 		highest_fitness = max([individual.get_fitness_score() for individual in self.population])
 		total_fitness = sum([individual.get_fitness_score() for individual in self.population])
 		average_fitness = total_fitness / len(self.population)
-		return print(f"{self.current_generation}: {total_fitness=}, {average_fitness=}, {highest_fitness=}, {len(self.population)=}")
+		print(
+			f"{self.current_generation}: {total_fitness=}, {average_fitness=}, {highest_fitness=}, {len(self.population)=}")
+		return [self.current_generation, total_fitness, average_fitness, highest_fitness, len(self.population)]
 
 	def start_algorithm(self):
-		self.get_generation_statistics()
+		stats = self.get_generation_statistics()
+		self.save_generation_statistics(stats)
 		while ((self.current_generation <= config.MAX_GENERATIONS) & (self.highest_fitness < int(config.CHROMOSOME_LENGTH))):
 			self.create_new_generation_tournament()
 			self.current_generation += 1
 			self.highest_fitness = max([individual.get_fitness_score() for individual in self.population])
-			self.get_generation_statistics()
+			stats = self.get_generation_statistics()
+			self.save_generation_statistics(stats)
 
-ga = GA()
+
+for i in range(250):
+	ga = GA()
