@@ -3,33 +3,36 @@ import random
 from individual import Individual
 import config
 
-class GA():
-	population_size = config.POPULATION_SIZE
-	tournament_selection_percent = config.TOURNAMENT_SELECTION_PERCENT
-	crossover_point = config.CROSSOVER_POINT
-
+class GA:
 
 	def __init__(self):
 		self.population: list[Individual] = self.generate_first_gen_individuals()
 		self.highest_fitness = max([individual.get_fitness_score() for individual in self.population])
 		self.current_generation: int = 1
 		self.start_algorithm()
-		# print(self.population)
-		# print([indiv.get_fitness_score() for indiv in self.population])
-
 
 	def generate_first_gen_individuals(self):
+		"""Generate the first generation of individuals
+
+		:return: Returns the population, a list of individuals
+		"""
 		pop: list[Individual] = []
 
-		for _ in range(self.population_size):
+		for _ in range(len(self.population)):
 			indiv = Individual()
 			pop.append(indiv)
 
 		return pop
 
 	def tournament_selection(self) -> Individual:
-		"""Pick k random individuals. From those k individuals, select the best."""
-		tournament_size: int = int(self.tournament_selection_percent * self.population_size)
+		"""Performs tournament selection
+
+		We select /config.TOURNAMENT_SELECTION_PERCENT/ of the population and then select the individual with the highest fitness
+
+		:rtype: Individual
+		:return: Returns the fittest individual
+		"""
+		tournament_size: int = int(config.TOURNAMENT_SELECTION_PERCENT * len(self.population))
 		tournament_population: list[Individual] = random.sample(self.population, tournament_size)
 		tournament_scores: list[int] = [individual.get_fitness_score() for individual in tournament_population]
 
@@ -44,9 +47,11 @@ class GA():
 
 		return highest_individual
 
-	def create_new_generation(self):
-		"""Given the current population, create the new generation"""
+	def create_new_generation_tournament(self) -> None:
+		"""Creates a new generation of individuals, using a tournament selection process
 
+		:return: None
+		"""
 		children = []
 
 		elites = self.select_best(config.ELITES_SIZE)
@@ -68,36 +73,53 @@ class GA():
 		return
 
 	def select_best(self, k=2):
+		"""Select the best individuals from self.population
+
+		:param k: Select k amount of individuals with the highest fitness
+		:return: The k best individuals
+		"""
 		elites = []
 
-		pop = self.population.copy()
-		pop_scores = [individual.get_fitness_score() for individual in pop]
+		pop_copy = self.population.copy()
+		pop_scores = [individual.get_fitness_score() for individual in pop_copy]
 		for _ in range(k):
 			highest_score: int = -1
 			highest_score_i: int = 0
 			highest_individual: Individual = None
 
-			for i, individual in enumerate(pop):
+			for i, individual in enumerate(pop_copy):
 				individual_score: int = pop_scores[i]
 				if individual_score > highest_score:
 					highest_score = individual_score
 					highest_score_i = i
 					highest_individual = individual
 
-			pop.pop(highest_score_i)
+			pop_copy.pop(highest_score_i)
 			pop_scores.pop(highest_score_i)
 			elites.append(highest_individual)
+
 		return elites
 
-	def breed_individuals(self, parent_a: Individual, parent_b: Individual):
-		parent_a_chromosome = parent_a.chromosome
-		parent_b_chromosome = parent_b.chromosome
+	def breed_individuals(self, parent_a: Individual, parent_b: Individual) -> tuple[Individual, Individual]:
+		"""Breeds two individuals' chromosomes.
 
-		child_a_chromosome = parent_a_chromosome[:self.crossover_point] + parent_b_chromosome[self.crossover_point:]
-		child_b_chromosome = parent_b_chromosome[:self.crossover_point] + parent_a_chromosome[self.crossover_point:]
+		Uses a fixed crossover point /config.CROSSOVER_POINT/ to decide how much of each parents' chromosomes to share with the other
 
-		child_a = Individual(child_a_chromosome)
-		child_b = Individual(child_b_chromosome)
+		:param parent_a: Individual A
+		:param parent_b: Individual B
+		:rtype: tuple[Individual, Individual]
+		:return:
+		"""
+		c_point: int = config.CROSSOVER_POINT
+
+		parent_a_chromosome: list[int] = parent_a.chromosome
+		parent_b_chromosome: list[int] = parent_b.chromosome
+
+		child_a_chromosome: list[int] = parent_a_chromosome[:c_point] + parent_b_chromosome[c_point:]
+		child_b_chromosome: list[int] = parent_b_chromosome[:c_point] + parent_a_chromosome[c_point:]
+
+		child_a: Individual = Individual(child_a_chromosome)
+		child_b: Individual = Individual(child_b_chromosome)
 
 		child_a.mutation()
 		child_b.mutation()
@@ -117,7 +139,5 @@ class GA():
 			self.current_generation += 1
 			self.highest_fitness = max([individual.get_fitness_score() for individual in self.population])
 			self.get_generation_statistics()
-
-
 
 ga = GA()
