@@ -104,7 +104,7 @@ class GATournament:
 		with open(self.file_name, mode='a', newline="\n") as csv_file:
 			writer = csv.writer(csv_file)
 			iteration, generation, total, average, highest, popsize = statistics
-			writer.writerow([generation, total, average, highest, popsize, complete])
+			writer.writerow([iteration, generation, total, average, highest, popsize, complete])
 		return
 
 	def get_generation_statistics(self) -> list[int | float]:
@@ -146,7 +146,7 @@ file_name: str = "tournament.csv"
 with open(file_name, mode='w', newline="\n") as csv_file:
 	writer = csv.writer(csv_file)
 	writer.writerow([
-		"GAIteration"
+		"GAIteration",
 		"GenerationNumber",
 		"TotalFitness",
 		"AverageFitness",

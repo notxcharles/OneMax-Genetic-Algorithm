@@ -169,7 +169,7 @@ file_name = "roulette_with_elites.csv"
 with open(file_name, mode='w', newline="\n") as csv_file:
 	writer = csv.writer(csv_file)
 	writer.writerow([
-		"GAIteration"
+		"GAIteration",
 		"GenerationNumber",
 		"TotalFitness",
 		"AverageFitness",
