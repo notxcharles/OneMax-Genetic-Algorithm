@@ -11,9 +11,9 @@ class Individual:
 		if chromosome:
 			if len(chromosome) != self.chromosome_length:
 				raise Exception(f"Chromosome must be of length: {self.chromosome_length}")
-			self.chromosome = chromosome
+			self.chromosome: Chromosome = chromosome
 		else:
-			self.chromosome = self.generate_random_chromosome()
+			self.chromosome: Chromosome = self.generate_random_chromosome()
 
 	def __eq__(self, other):
 		"""The individual is equal to their fitness score"""
