@@ -1,5 +1,5 @@
 # OneMax Genetic Algorithm
-The goal is to find a binary string of a given length that contains all ones, thereby maximizing the sum of its digits, using a genetic algorithm
+The goal is to find a binary array of a given length that contains all ones, thereby maximizing the sum of its digits, using a genetic algorithm
 
 ## Population
 A population is a set of candidate solutions (set of individuals).
