@@ -2,19 +2,21 @@ import random
 import csv
 
 from individual import Individual
+from custom_types import *
 import config
 
 class GATournament:
-	def __init__(self, filename: str):
+	def __init__(self, filename: str, iteration: str):
 		self.population: list[Individual] = self.generate_first_gen_individuals()
-		self.highest_fitness = max([individual.get_fitness_score() for individual in self.population])
+		self.highest_fitness: int = max([individual.get_fitness_score() for individual in self.population])
 		self.current_generation: int = 1
 
 		self.file_name = filename
+		self.iteration = iteration
 
 		self.start_algorithm()
 
-	def generate_first_gen_individuals(self):
+	def generate_first_gen_individuals(self) -> list[Individual]:
 		"""Generate the first generation of individuals
 
 		:return: Returns the population, a list of individuals
@@ -22,8 +24,8 @@ class GATournament:
 		pop: list[Individual] = []
 
 		for _ in range(config.MAX_GENERATIONS):
-			indiv = Individual()
-			pop.append(indiv)
+			individual = Individual()
+			pop.append(individual)
 
 		return pop
 
@@ -35,22 +37,22 @@ class GATournament:
 		:rtype: Individual
 		:return: Returns the fittest individual
 		"""
-		tournament_size: int = int(config.TOURNAMENT_SELECTION_PERCENT * len(self.population))
+		tournament_size = int(config.TOURNAMENT_SELECTION_PERCENT * len(self.population))
 		tournament_population: list[Individual] = random.sample(self.population, tournament_size)
 		tournament_scores: list[int] = [individual.get_fitness_score() for individual in tournament_population]
 
-		highest_score: int = -1
+		highest_score = -1
 		highest_individual: Individual = None
 
 		for i, individual in enumerate(tournament_population):
-			individual_score: int = tournament_scores[i]
+			individual_score = tournament_scores[i]
 			if individual_score > highest_score:
 				highest_score = individual_score
 				highest_individual = individual
 
 		return highest_individual
 
-	def create_new_generation_tournament(self) -> None:
+	def create_new_generation(self) -> None:
 		"""Creates a new generation of individuals, using a tournament selection process
 
 		:return: None
@@ -81,13 +83,13 @@ class GATournament:
 		:rtype: tuple[Individual, Individual]
 		:return:
 		"""
-		c_point: int = config.CROSSOVER_POINT
+		c_point = config.CROSSOVER_POINT
 
-		parent_a_chromosome: list[int] = parent_a.chromosome
-		parent_b_chromosome: list[int] = parent_b.chromosome
+		parent_a_chromosome: Chromosome = parent_a.chromosome
+		parent_b_chromosome: Chromosome = parent_b.chromosome
 
-		child_a_chromosome: list[int] = parent_a_chromosome[:c_point] + parent_b_chromosome[c_point:]
-		child_b_chromosome: list[int] = parent_b_chromosome[:c_point] + parent_a_chromosome[c_point:]
+		child_a_chromosome: Chromosome = parent_a_chromosome[:c_point] + parent_b_chromosome[c_point:]
+		child_b_chromosome: Chromosome = parent_b_chromosome[:c_point] + parent_a_chromosome[c_point:]
 
 		child_a: Individual = Individual(child_a_chromosome)
 		child_b: Individual = Individual(child_b_chromosome)
@@ -97,36 +99,54 @@ class GATournament:
 
 		return (child_a, child_b)
 
-	def save_generation_statistics(self, statistics: list[int | float], complete=False):
+	def save_generation_statistics(self, statistics: list[int | float], complete=False) -> None:
+		"""Saves /statistics/ to self.file_name"""
 		with open(self.file_name, mode='a', newline="\n") as csv_file:
 			writer = csv.writer(csv_file)
-			generation, total, average, highest, popsize = statistics
+			iteration, generation, total, average, highest, popsize = statistics
 			writer.writerow([generation, total, average, highest, popsize, complete])
 		return
 
-	def get_generation_statistics(self):
+	def get_generation_statistics(self) -> list[int | float]:
+		"""Generates statistics about the algorithm's current progress
+
+		iteration: how many times previously has this algorithm run
+		current_generation: the current generation number
+		highest fitness: this generation's individual with the highest fitness
+		total_fitness: the total fitness of this generation
+		average_fitness: the average fitness of this generation
+		population_size: the number of individuals in this generation
+
+		:rtype: list[int | float]
+		:return: list of statistics
+		"""
 		highest_fitness = max([individual.get_fitness_score() for individual in self.population])
 		total_fitness = sum([individual.get_fitness_score() for individual in self.population])
 		average_fitness = total_fitness / len(self.population)
 		print(
-			f"{self.current_generation}: {total_fitness=}, {average_fitness=}, {highest_fitness=}, {len(self.population)=}")
-		return [self.current_generation, total_fitness, average_fitness, highest_fitness, len(self.population)]
+			f"{self.iteration=}/{self.current_generation}: {total_fitness=}, {average_fitness=}, "
+			f"{highest_fitness=}, {len(self.population)=}")
+		return [self.iteration, self.current_generation, total_fitness, average_fitness, highest_fitness,
+				len(self.population)]
 
-	def start_algorithm(self):
+	def start_algorithm(self) -> None:
+		"""Starts the genetic algorithm until it reaches the stopping criteria"""
 		while ((self.current_generation <= config.MAX_GENERATIONS) & (self.highest_fitness < int(config.CHROMOSOME_LENGTH))):
 			stats = self.get_generation_statistics()
 			self.save_generation_statistics(stats)
-			self.create_new_generation_tournament()
+			self.create_new_generation()
 			self.current_generation += 1
 			self.highest_fitness = max([individual.get_fitness_score() for individual in self.population])
 		stats = self.get_generation_statistics()
 		self.save_generation_statistics(stats, True)
+		return
 
-file_name = "tournament.csv"
+file_name: str = "tournament.csv"
 
 with open(file_name, mode='w', newline="\n") as csv_file:
 	writer = csv.writer(csv_file)
 	writer.writerow([
+		"GAIteration"
 		"GenerationNumber",
 		"TotalFitness",
 		"AverageFitness",
@@ -136,4 +156,4 @@ with open(file_name, mode='w', newline="\n") as csv_file:
 	])
 
 for i in range(1000):
-	ga = GATournament(file_name)
+	ga = GATournament(file_name, f"iteration{i+1}")
